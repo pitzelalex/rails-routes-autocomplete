@@ -9,13 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["workspaceContains:**/config/routes.rb"],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "railsroutesautocomplete.helloWorld",
-        "title": "Hello World"
+        "title": "Get Routes"
       }
     ]
   },
@@ -39,5 +39,6 @@
     "mocha": "^10.2.0",
     "typescript": "^4.9.5",
     "@vscode/test-electron": "^2.3.0"
-  }
+  },
+  "railsRoutes": "rails routes"
 }
