@@ -24,16 +24,41 @@ export function activate(context: vscode.ExtensionContext) {
 		cwd: workspaceFolder[0].uri.fsPath
 	});
 	process.stdin.write("Rails.application.routes.named_routes.helper_names\n");
-	let outputChannel = vscode.window.createOutputChannel('rails routes');
-
+	
+	// let outputChannel = vscode.window.createOutputChannel('rails routes');
+	let output: any = [];
+	let helperMethods: any |undefined;
+	let provider: any;
+	
 	process.stdout.on('data', (data) => {
-		console.log(data.toString());
-    outputChannel.appendLine(data);
+		// console.log(typeof data);
+		output.push(data.toString().replace(/['"\s\[\]]+/g, ''));
+		// outputChannel.appendLine(data);
+		// console.log(output[2]);
   });
-	outputChannel.show();
+	
+	process.stdin.write("exit\n");
 
-	vscode.languages.registerCompletionItemProvider()
-
+	process.stdout.on('close', () => {
+		helperMethods = output[2];
+		// console.log(helperMethods);
+		provider = vscode.languages.registerCompletionItemProvider("ruby", {
+			provideCompletionItems() {
+				const completionItems: vscode.CompletionItem[] = [];
+				// const helper_methods = outputChannel.split or whatever; //find the part of output that matters
+				// const helperMethods = output[-1];
+				for (const method of helperMethods?.split(",")) {
+					console.log(method);
+					const item = new vscode.CompletionItem(method, vscode.CompletionItemKind.Method);
+					item.insertText = method;
+					completionItems.push(item);
+				}
+				return completionItems;
+			}
+		});
+	});
+	// outputChannel.show();
+	
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -43,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from rails-routes-autocomplete!');
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(provider);
 }
 
 // This method is called when your extension is deactivated
